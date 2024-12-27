@@ -2,6 +2,7 @@ package com.sluja.lma.assistant.operator.processes.signup.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sluja.lma.assistant.operator.utils.validation.PasswordStrengthChecker;
 import com.sluja.lma.assistant.operator.utils.validation.ValidationPatterns;
 
 import jakarta.validation.constraints.Email;
@@ -33,11 +34,19 @@ public record NewOperatorDataDTO(
                 if (!username.matches(ValidationPatterns.USERNAME_PATTERN))
                         throw new IllegalArgumentException(ValidationPatterns.USERNAME_MESSAGE);
 
-                if (!password.matches(ValidationPatterns.PASSWORD_PATTERN))
+                else if (!password.matches(ValidationPatterns.PASSWORD_PATTERN))
                         throw new IllegalArgumentException(ValidationPatterns.PASSWORD_MESSAGE);
 
-                if (!email.matches(ValidationPatterns.EMAIL_PATTERN))
+                else if (!email.matches(ValidationPatterns.EMAIL_PATTERN))
                         throw new IllegalArgumentException(ValidationPatterns.EMAIL_MESSAGE);
+
+                final PasswordStrengthChecker.PasswordStrengthResult passwordStrengthResult = PasswordStrengthChecker
+                                .checkPasswordStrength(password);
+                if (!passwordStrengthResult.isStrong()) {
+                        throw new IllegalArgumentException(
+                                        "Your password is not strong enough! Follow these suggestions: "
+                                                        + passwordStrengthResult.getSuggestionsAsString());
+                }
         }
 
         public static NewOperatorDataDTO of(final String firstName,
