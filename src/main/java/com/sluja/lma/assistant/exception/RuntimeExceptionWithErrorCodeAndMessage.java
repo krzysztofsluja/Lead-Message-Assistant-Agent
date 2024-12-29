@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 
 @Getter
-public abstract class ExceptionWithErrorCodeAndMessage extends Exception {
+public abstract class RuntimeExceptionWithErrorCodeAndMessage extends RuntimeException {
 
     private final Long errorCode;
     private final Map<String, List<String>> errorMessagesWithAdditionalInformation;
     // private final List<String> errorMessages;
     // private List<String> additionalInformation;
 
-    public ExceptionWithErrorCodeAndMessage(final Long errorCode, final String errorMessage) {
+    public RuntimeExceptionWithErrorCodeAndMessage(final Long errorCode, final String errorMessage) {
         super(errorMessage);
         this.errorCode = errorCode;
         this.errorMessagesWithAdditionalInformation = Map.of(errorMessage, List.of());
@@ -23,14 +23,14 @@ public abstract class ExceptionWithErrorCodeAndMessage extends Exception {
         // this.additionalInformation = List.of();
     }
 
-    public ExceptionWithErrorCodeAndMessage(final Long errorCode,
+    public RuntimeExceptionWithErrorCodeAndMessage(final Long errorCode,
             final ExceptionMessageWithAdditionalInformation exceptionMessageWithAdditionalInformation) {
         this(errorCode, exceptionMessageWithAdditionalInformation.errorMessage());
         this.errorMessagesWithAdditionalInformation.put(exceptionMessageWithAdditionalInformation.errorMessage(),
                 exceptionMessageWithAdditionalInformation.additionalInformation());
     }
 
-    public ExceptionWithErrorCodeAndMessage(final Long errorCode, final List<String> errorMessages,
+    public RuntimeExceptionWithErrorCodeAndMessage(final Long errorCode, final List<String> errorMessages,
             final ExceptionMessageWithAdditionalInformation exceptionMessageWithAdditionalInformation) {
         super();
         this.errorCode = errorCode;
@@ -41,7 +41,7 @@ public abstract class ExceptionWithErrorCodeAndMessage extends Exception {
                 exceptionMessageWithAdditionalInformation.additionalInformation());
     }
 
-    public ExceptionWithErrorCodeAndMessage(final Long errorCode,
+    public RuntimeExceptionWithErrorCodeAndMessage(final Long errorCode,
             final List<ExceptionMessageWithAdditionalInformation> errorMessagesWithAdditionalInformation) {
         super();
         this.errorCode = errorCode;
@@ -50,12 +50,5 @@ public abstract class ExceptionWithErrorCodeAndMessage extends Exception {
                         exceptionMessageWithAdditionalInformation.errorMessage(),
                         exceptionMessageWithAdditionalInformation.additionalInformation()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public ExceptionWithErrorCodeAndMessage(final Long errorCode,
-            final Map<String, List<String>> errorMessagesWithAdditionalInformation) {
-        super();
-        this.errorCode = errorCode;
-        this.errorMessagesWithAdditionalInformation = errorMessagesWithAdditionalInformation;
     }
 }

@@ -5,6 +5,6 @@ import com.sluja.lma.assistant.exception.ExceptionWithErrorCodeAndMessage;
 public class IncorrectOperatorDataException extends ExceptionWithErrorCodeAndMessage {
 
     public IncorrectOperatorDataException() {
-        super(1000L, "error.operator.signup.incorrect.data");
+        super(1001L, "error.operator.signup.incorrect.data");
     }
 }
