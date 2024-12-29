@@ -1,7 +1,13 @@
 package com.sluja.lma.assistant.operator.processes.signup.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.sluja.lma.assistant.exception.ExceptionMessageWithAdditionalInformation;
+import com.sluja.lma.assistant.operator.processes.signup.exception.IncorrectNewOperatorDataException;
 import com.sluja.lma.assistant.operator.utils.validation.PasswordStrengthChecker;
 import com.sluja.lma.assistant.operator.utils.validation.ValidationPatterns;
 
@@ -30,23 +36,29 @@ public record NewOperatorDataDTO(
                 lastName = lastName.trim();
                 username = username.trim();
                 email = email.trim();
+                final List<ExceptionMessageWithAdditionalInformation> errorMessages = new ArrayList<>();
 
                 if (!username.matches(ValidationPatterns.USERNAME_PATTERN))
-                        throw new IllegalArgumentException(ValidationPatterns.USERNAME_MESSAGE);
+                        errorMessages.add(ExceptionMessageWithAdditionalInformation
+                                        .of(ValidationPatterns.USERNAME_MESSAGE, List.of()));
 
                 else if (!password.matches(ValidationPatterns.PASSWORD_PATTERN))
-                        throw new IllegalArgumentException(ValidationPatterns.PASSWORD_MESSAGE);
+                        errorMessages.add(ExceptionMessageWithAdditionalInformation
+                                        .of(ValidationPatterns.PASSWORD_MESSAGE, List.of()));
 
                 else if (!email.matches(ValidationPatterns.EMAIL_PATTERN))
-                        throw new IllegalArgumentException(ValidationPatterns.EMAIL_MESSAGE);
+                        errorMessages.add(ExceptionMessageWithAdditionalInformation.of(ValidationPatterns.EMAIL_MESSAGE,
+                                        List.of()));
 
                 final PasswordStrengthChecker.PasswordStrengthResult passwordStrengthResult = PasswordStrengthChecker
                                 .checkPasswordStrength(password);
-                if (!passwordStrengthResult.isStrong()) {
-                        throw new IllegalArgumentException(
-                                        "Your password is not strong enough! Follow these suggestions: "
-                                                        + passwordStrengthResult.getSuggestionsAsString());
-                }
+                if (!passwordStrengthResult.isStrong())
+                        errorMessages.add(ExceptionMessageWithAdditionalInformation.of(
+                                        ValidationPatterns.PASSWORD_STRENGTH_MESSAGE,
+                                        passwordStrengthResult.getSuggestions()));
+
+                if (CollectionUtils.isNotEmpty(errorMessages))
+                        throw new IncorrectNewOperatorDataException(errorMessages);
         }
 
         public static NewOperatorDataDTO of(final String firstName,

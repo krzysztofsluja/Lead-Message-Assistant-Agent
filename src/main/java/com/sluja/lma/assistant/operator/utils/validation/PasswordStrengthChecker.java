@@ -14,8 +14,8 @@ public class PasswordStrengthChecker {
 
     private static final int STRONG_PASSWORD_STRENGTH = 3;
 
+    @Getter
     public static class PasswordStrengthResult {
-        @Getter
         private final boolean isStrong;
         private final List<String> suggestions;
 
