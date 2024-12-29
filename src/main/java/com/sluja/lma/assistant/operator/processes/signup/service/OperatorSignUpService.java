@@ -14,6 +14,7 @@ import com.sluja.lma.assistant.operator.processes.signup.repository.OperatorData
 import com.sluja.lma.assistant.operator.processes.signup.service.interfaces.IOperatorSignUp;
 import com.sluja.lma.assistant.operator.utils.validation.OperatorValidationUtils;
 import com.sluja.lma.assistant.utils.mapper.IEntityMapper;
+import com.sluja.lma.assistant.operator.processes.signup.dto.response.SignUpInitializationResponseDTO;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,7 @@ public class OperatorSignUpService implements IOperatorSignUp {
 
     @Override
     @SneakyThrows
-    public void initializeSignUp(final NewOperatorDataRequestDTO newOperatorDataRequestDTO) {
-
+    public SignUpInitializationResponseDTO initializeSignUp(final NewOperatorDataRequestDTO newOperatorDataRequestDTO) {
         log.info("Initializing sign up for operator: {}", newOperatorDataRequestDTO);
         if (OperatorValidationUtils.isUsernameInvalid(newOperatorDataRequestDTO.username())
                 || OperatorValidationUtils.isEmailInvalid(newOperatorDataRequestDTO.email()))
@@ -49,7 +49,8 @@ public class OperatorSignUpService implements IOperatorSignUp {
                     newOperatorDataRequestDTO.email());
 
             // TODO send verification topic
-            saveUnverifiedOperatorData(newOperatorDataDTO);
+            final OperatorData savedOperator = saveUnverifiedOperatorData(newOperatorDataDTO);
+            return SignUpInitializationResponseDTO.of(savedOperator.getId().toString());
         } catch (final RuntimeExceptionWithErrorCodeAndMessage ex) {
             log.error("Invalid operator data for request: {}", newOperatorDataRequestDTO, ex);
             throw new OperatorSignUpInterruptedException(ex.getErrorMessagesWithAdditionalInformation());
@@ -63,11 +64,12 @@ public class OperatorSignUpService implements IOperatorSignUp {
     }
 
     @Transactional(Transactional.TxType.REQUIRES_NEW)
-    private void saveUnverifiedOperatorData(final NewOperatorDataDTO newOperatorDataDTO)
+    private OperatorData saveUnverifiedOperatorData(final NewOperatorDataDTO newOperatorDataDTO)
             throws ExceptionWithErrorCodeAndMessage {
         final OperatorData operatorData = newOperatorDataDTOtoOperatorDataMapper.toEntity(newOperatorDataDTO);
         final OperatorData savedOperatorData = operatorDataRepository.save(operatorData);
         log.info("Operator data saved successfully with id: {}", savedOperatorData.getId());
+        return savedOperatorData;
     }
 
     private boolean operatorExists(final String username, final String email) {
