@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sluja.lma.assistant.exception.ExceptionMessageWithAdditionalInformation;
 import com.sluja.lma.assistant.operator.processes.signup.exception.IncorrectNewOperatorDataException;
+import com.sluja.lma.assistant.operator.utils.validation.OperatorValidationUtils;
 import com.sluja.lma.assistant.operator.utils.validation.PasswordStrengthChecker;
 import com.sluja.lma.assistant.operator.utils.validation.ValidationPatterns;
 
@@ -21,11 +22,11 @@ public record NewOperatorDataDTO(
 
                 @NotBlank(message = "Last name is required") @Size(min = 2, max = 9, message = "Last name must be between 2 and 50 characters") String lastName,
 
-                @NotBlank(message = "Username is required") @Size(min = 3, max = 50, message = "Username must be between 3 and 9 characters") @Pattern(regexp = ValidationPatterns.USERNAME_PATTERN, message = ValidationPatterns.USERNAME_MESSAGE) String username,
+                @NotBlank(message = "Username is required") @Size(min = 3, max = 50, message = "Username must be between 3 and 9 characters") @Pattern(regexp = ValidationPatterns.USERNAME_PATTERN, message = ValidationPatterns.USERNAME_MESSAGE_CODE) String username,
 
-                @NotBlank(message = "Password is required") @Pattern(regexp = ValidationPatterns.PASSWORD_PATTERN, message = ValidationPatterns.PASSWORD_MESSAGE) String password,
+                @NotBlank(message = "Password is required") @Pattern(regexp = ValidationPatterns.PASSWORD_PATTERN, message = ValidationPatterns.PASSWORD_MESSAGE_CODE) String password,
 
-                @NotBlank(message = "Email is required") @Email(message = ValidationPatterns.EMAIL_MESSAGE) String email) {
+                @NotBlank(message = "Email is required") @Email(message = ValidationPatterns.EMAIL_MESSAGE_CODE) String email) {
 
         public NewOperatorDataDTO {
                 if (StringUtils.isAnyBlank(firstName, lastName, username, password, email)) {
@@ -38,16 +39,17 @@ public record NewOperatorDataDTO(
                 email = email.trim();
                 final List<ExceptionMessageWithAdditionalInformation> errorMessages = new ArrayList<>();
 
-                if (!username.matches(ValidationPatterns.USERNAME_PATTERN))
+                if (OperatorValidationUtils.isUsernameInvalid(username))
                         errorMessages.add(ExceptionMessageWithAdditionalInformation
-                                        .of(ValidationPatterns.USERNAME_MESSAGE, List.of()));
+                                        .of(ValidationPatterns.USERNAME_MESSAGE_CODE, List.of()));
 
-                else if (!password.matches(ValidationPatterns.PASSWORD_PATTERN))
+                else if (OperatorValidationUtils.isPasswordInvalid(password))
                         errorMessages.add(ExceptionMessageWithAdditionalInformation
-                                        .of(ValidationPatterns.PASSWORD_MESSAGE, List.of()));
+                                        .of(ValidationPatterns.PASSWORD_MESSAGE_CODE, List.of()));
 
-                else if (!email.matches(ValidationPatterns.EMAIL_PATTERN))
-                        errorMessages.add(ExceptionMessageWithAdditionalInformation.of(ValidationPatterns.EMAIL_MESSAGE,
+                else if (OperatorValidationUtils.isEmailInvalid(email))
+                        errorMessages.add(ExceptionMessageWithAdditionalInformation.of(
+                                        ValidationPatterns.EMAIL_MESSAGE_CODE,
                                         List.of()));
 
                 final PasswordStrengthChecker.PasswordStrengthResult passwordStrengthResult = PasswordStrengthChecker
