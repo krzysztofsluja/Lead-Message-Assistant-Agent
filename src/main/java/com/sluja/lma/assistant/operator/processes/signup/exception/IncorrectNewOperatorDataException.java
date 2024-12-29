@@ -11,4 +11,8 @@ public class IncorrectNewOperatorDataException extends RuntimeExceptionWithError
             final List<ExceptionMessageWithAdditionalInformation> errorMessagesWithAdditionalInformation) {
         super(1004L, errorMessagesWithAdditionalInformation);
     }
+
+    public IncorrectNewOperatorDataException() {
+        super(1004L, "error.operator.signup.incorrect.data");
+    }
 }

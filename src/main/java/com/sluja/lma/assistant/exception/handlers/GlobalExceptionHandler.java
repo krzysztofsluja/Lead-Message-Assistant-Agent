@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
         private final MessageSource messageSource;
         private static final String GENERAL_ERROR_CODE = "error.general";
         private static final String DEFAULT_ERROR_MESSAGE = "An error occurred... Please try later";
+        private static final String ERROR_PREFIX = "error.";
 
         @ExceptionHandler(ExceptionWithErrorCodeAndMessage.class)
         public ResponseEntity<ErrorResponseDTO> handleExceptionWithErrorCodeAndMessage(
@@ -39,12 +40,16 @@ public class GlobalExceptionHandler {
                                         .stream()
                                         .collect(Collectors.toMap(
                                                         entry -> {
+                                                                String messageKey = entry.getKey();
+                                                                if (!messageKey.startsWith(ERROR_PREFIX)) {
+                                                                        return messageKey;
+                                                                }
                                                                 try {
-                                                                        return messageSource.getMessage(entry.getKey(),
+                                                                        return messageSource.getMessage(messageKey,
                                                                                         null, Locale.getDefault());
                                                                 } catch (NoSuchMessageException e) {
                                                                         log.warn("Message key not found: {}",
-                                                                                        entry.getKey());
+                                                                                        messageKey);
                                                                         return messageSource.getMessage(
                                                                                         GENERAL_ERROR_CODE,
                                                                                         null,
